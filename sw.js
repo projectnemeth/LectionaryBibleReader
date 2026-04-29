@@ -1,17 +1,18 @@
 /* Daily Word — service worker
    Cache strategy:
    - App shell (HTML/CSS/JS): cache-first with background revalidate.
-   - API.Bible passage requests: network-first, fall back to cache so today's
-     reading remains available offline once you've opened it.
-   - RSS feed: network-only (always fresh; today's date matters).
+   - api.php?action=passage: network-first, fall back to cache so previously-
+     viewed days remain available offline.
+   - api.php?action=feed: network-only (today's date matters; feed is fresh).
 */
 
-const VERSION = 'dailyword-v3';
+const VERSION = 'dailyword-v6';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icon.svg'
+  './icon.svg',
+  './icon-180.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -33,36 +34,41 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
+  const isApi = url.origin === self.location.origin && /\/api\.php$/.test(url.pathname);
 
-  // RSS / proxy: network only (today's content)
-  if (url.pathname.includes('lectionary') || url.hostname.includes('allorigins') || url.hostname.includes('corsproxy')) {
-    return; // default: hit network
+  if (isApi) {
+    const action = url.searchParams.get('action');
+    // Feed: always fresh
+    if (action === 'feed') return;
+    // Passages: network-first with cache fallback
+    if (action === 'passage') {
+      event.respondWith((async () => {
+        try {
+          const fresh = await fetch(req);
+          if (fresh.ok) {
+            const cache = await caches.open(VERSION);
+            cache.put(req, fresh.clone());
+          }
+          return fresh;
+        } catch (err) {
+          const cached = await caches.match(req);
+          if (cached) return cached;
+          throw err;
+        }
+      })());
+      return;
+    }
   }
 
-  // API.Bible passages: network-first, then cache fallback
-  if (url.hostname === 'rest.api.bible' || url.hostname === 'api.scripture.api.bible') {
-    event.respondWith((async () => {
-      try {
-        const fresh = await fetch(req);
-        const cache = await caches.open(VERSION);
-        cache.put(req, fresh.clone());
-        return fresh;
-      } catch (err) {
-        const cached = await caches.match(req);
-        if (cached) return cached;
-        throw err;
-      }
-    })());
-    return;
-  }
-
-  // App shell: cache-first with revalidate
+  // App shell: cache-first with background revalidate
   if (url.origin === self.location.origin) {
     event.respondWith((async () => {
       const cached = await caches.match(req);
       const fetchPromise = fetch(req).then((res) => {
-        const copy = res.clone();
-        caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {});
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {});
+        }
         return res;
       }).catch(() => cached);
       return cached || fetchPromise;

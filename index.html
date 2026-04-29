@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Daily Word">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>Daily Word</title>
 <style>
@@ -77,6 +77,10 @@
     background: linear-gradient(to bottom, var(--bg) 70%, transparent);
     padding-top: calc(14px + env(safe-area-inset-top));
   }
+  .crest-btn {
+    background: none; border: 0; padding: 4px 0; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
   .crest {
     font-family: var(--sans); font-size: 11px; letter-spacing: .18em;
     text-transform: uppercase; color: var(--ink-faint); font-weight: 600;
@@ -88,7 +92,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   .iconbtn:hover, .iconbtn:focus-visible { background: var(--rule); color: var(--ink); outline: 0; }
-  .iconbtn svg { display: block; width: 20px; height: 20px; }
+  .iconbtn svg { display: block; width: 22px; height: 22px; }
 
   /* ---------- Main reading column ---------- */
   main {
@@ -97,6 +101,20 @@
     padding: 0 24px 96px;
   }
   .heading-block { text-align: center; padding: 18px 0 32px; }
+  .back-to-today {
+    display: inline-block;
+    font-family: var(--sans); font-size: 10.5px;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink-soft); text-decoration: none; font-weight: 600;
+    padding: 7px 14px; margin: 0 0 18px;
+    background: var(--bg-elevated); border: 1px solid var(--rule);
+    border-radius: 999px; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color .15s, color .15s;
+  }
+  .back-to-today:hover, .back-to-today:focus-visible {
+    border-color: var(--ink-soft); color: var(--ink); outline: 0;
+  }
   .date-line {
     font-family: var(--sans); font-size: 12px; letter-spacing: .22em;
     text-transform: uppercase; color: var(--ink-faint); font-weight: 600;
@@ -123,7 +141,6 @@
   }
   .passage-body p { margin: 0 0 1em; }
   .passage-body { hyphens: auto; -webkit-hyphens: auto; }
-  /* Verse numbers from API.Bible (it returns <span class="v">1</span>) */
   .passage-body .v {
     font-family: var(--sans); font-size: 0.62em;
     vertical-align: 0.4em; color: var(--ink-faint);
@@ -135,7 +152,6 @@
     vertical-align: 0.4em; color: var(--ink-faint);
     margin: 0 0.2em 0 0; font-weight: 600;
   }
-  /* API.Bible commonly uses these classes */
   .passage-body .p { margin: 0 0 1em; }
   .passage-body .q, .passage-body .q1 { margin: 0 0 0.4em 1.5em; text-indent: -0.7em; }
   .passage-body .q2 { margin: 0 0 0.4em 2.5em; text-indent: -0.7em; }
@@ -143,18 +159,14 @@
   .passage-body .nd { font-variant: small-caps; letter-spacing: 0.04em; }
   .passage-body .wj { color: var(--accent); }
   .passage-body h1, .passage-body h2, .passage-body h3,
-  .passage-body .s, .passage-body .s1, .passage-body .s2 {
-    display: none; /* keep distraction-free; titles in API responses are headings we add ourselves */
-  }
+  .passage-body .s, .passage-body .s1, .passage-body .s2 { display: none; }
 
-  /* ---------- Section divider ---------- */
   .ornament {
     text-align: center; color: var(--ink-faint);
     margin: 18px 0; font-size: 1.1rem; letter-spacing: 1em;
   }
   .ornament::before { content: "❦"; }
 
-  /* ---------- States ---------- */
   .state {
     text-align: center; color: var(--ink-soft);
     padding: 80px 24px; max-width: 28rem; margin: 0 auto;
@@ -172,12 +184,7 @@
     letter-spacing: .04em; cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .state button.ghost {
-    background: transparent; color: var(--ink-soft);
-    border: 1px solid var(--rule);
-  }
 
-  /* Skeleton shimmer */
   .skeleton {
     background: linear-gradient(90deg, var(--rule), var(--bg-elevated), var(--rule));
     background-size: 200% 100%;
@@ -186,7 +193,7 @@
   }
   @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
 
-  /* ---------- Bottom sheet (settings) ---------- */
+  /* ---------- Bottom sheet (menu) ---------- */
   .sheet-backdrop {
     position: fixed; inset: 0; z-index: 50;
     background: rgba(0,0,0,.45);
@@ -209,36 +216,19 @@
     width: 38px; height: 4px; background: var(--rule);
     border-radius: 2px; margin: 8px auto 14px;
   }
-  .sheet h2 {
-    font-family: var(--serif); font-style: italic; font-weight: 500;
-    margin: 6px 0 18px; font-size: 1.5rem;
-  }
-  .sheet .group { margin: 22px 0; }
-  .sheet label {
-    display: block; font-family: var(--sans); font-size: 12px;
-    letter-spacing: .14em; text-transform: uppercase;
-    color: var(--ink-faint); font-weight: 600; margin-bottom: 8px;
-  }
-  .sheet input[type="text"], .sheet input[type="password"], .sheet select {
-    width: 100%; padding: 12px 14px; font-family: var(--sans); font-size: 16px;
-    background: var(--bg); color: var(--ink);
-    border: 1px solid var(--rule); border-radius: 10px;
-    appearance: none; -webkit-appearance: none;
-  }
-  .sheet input:focus, .sheet select:focus {
-    outline: 0; border-color: var(--accent);
-  }
-  .sheet .row { display: flex; gap: 8px; align-items: center; }
-  .sheet .row > * { flex: 1; }
-  .sheet .help {
-    font-family: var(--sans); font-size: 12px; color: var(--ink-soft);
-    margin-top: 8px; line-height: 1.5;
-  }
-  .sheet .help a { color: var(--accent); }
 
+  /* Menu sections */
+  .sheet h3 {
+    font-family: var(--sans); font-size: 11px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--ink-faint); font-weight: 600;
+    margin: 26px 0 8px;
+  }
+  .sheet h3:first-of-type { margin-top: 6px; }
+
+  /* Theme + size segmented controls */
   .seg {
     display: flex; background: var(--bg); border: 1px solid var(--rule);
-    border-radius: 10px; padding: 3px; gap: 3px;
+    border-radius: 10px; padding: 3px; gap: 3px; margin-top: 8px;
   }
   .seg button {
     flex: 1; background: transparent; border: 0; cursor: pointer;
@@ -249,28 +239,49 @@
   .seg button[aria-pressed="true"] {
     background: var(--ink); color: var(--bg);
   }
-
-  .sheet .primary {
-    width: 100%; padding: 14px; margin-top: 10px;
-    background: var(--ink); color: var(--bg); border: 0; border-radius: 12px;
-    font-family: var(--sans); font-size: 1rem; font-weight: 600;
-    letter-spacing: .02em; cursor: pointer;
-  }
-  .sheet .primary:disabled { opacity: 0.4; cursor: not-allowed; }
-  .sheet .secondary {
-    width: 100%; padding: 12px; margin-top: 8px;
-    background: transparent; color: var(--ink-soft); border: 1px solid var(--rule);
-    border-radius: 12px; font-family: var(--sans); font-size: 0.95rem; cursor: pointer;
+  .display-row { display: grid; grid-template-columns: 60px 1fr; align-items: center; gap: 12px; margin: 12px 0; }
+  .display-row span {
+    font-family: var(--sans); font-size: 12px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-soft); font-weight: 600;
   }
 
-  /* Footer credit */
+  /* Reading list */
+  .reading-list { list-style: none; padding: 0; margin: 0; }
+  .reading-item {
+    display: block; width: 100%; text-align: left;
+    background: transparent; border: 0; cursor: pointer;
+    padding: 13px 4px; border-bottom: 1px solid var(--rule);
+    font-family: var(--serif); color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+    transition: background .12s;
+  }
+  .reading-item:active { background: var(--rule); }
+  .reading-item:last-child { border-bottom: 0; }
+  .reading-item .ri-row { display: flex; align-items: baseline; gap: 8px; }
+  .reading-item .ri-today {
+    font-family: var(--sans); font-size: 10px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--accent); font-weight: 700;
+  }
+  .reading-item .ri-date {
+    font-family: var(--serif); font-size: 1.02rem; line-height: 1.3;
+  }
+  .reading-item .ri-feast {
+    display: block; font-style: italic; font-size: 0.86rem;
+    color: var(--ink-soft); margin-top: 2px;
+  }
+  .reading-item.current .ri-date { color: var(--accent); }
+  .reading-item.current .ri-feast { color: var(--accent); opacity: 0.85; }
+  .reading-empty {
+    font-family: var(--sans); font-size: 0.9rem; color: var(--ink-soft);
+    padding: 14px 4px;
+  }
+
   .credit {
     text-align: center; margin: 60px 24px 0;
     font-family: var(--sans); font-size: 11px; letter-spacing: .12em;
     color: var(--ink-faint); text-transform: uppercase;
   }
 
-  /* Scale variants for size segmented control */
   body[data-size="s"] { --reading-size: 1.0rem; --measure: 32rem; }
   body[data-size="m"] { --reading-size: 1.18rem; --measure: 34rem; }
   body[data-size="l"] { --reading-size: 1.34rem; --measure: 36rem; }
@@ -280,14 +291,21 @@
 <body>
 
 <header class="topbar">
-  <span class="crest">Daily Word</span>
-  <button class="iconbtn" id="btnSettings" aria-label="Settings">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1c0 .7.4 1.3 1 1.5a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0c.2.6.8 1 1.5 1H21a2 2 0 0 1 0 4h-.1c-.7 0-1.3.4-1.5 1z"/></svg>
+  <button class="crest-btn" id="btnHome" aria-label="Today's reading">
+    <span class="crest">Daily Word</span>
+  </button>
+  <button class="iconbtn" id="btnMenu" aria-label="Menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <line x1="4" y1="7" x2="20" y2="7"/>
+      <line x1="4" y1="12" x2="20" y2="12"/>
+      <line x1="4" y1="17" x2="20" y2="17"/>
+    </svg>
   </button>
 </header>
 
 <main id="main">
   <div class="heading-block">
+    <button class="back-to-today" id="backToToday" hidden>← Back to today</button>
     <div class="date-line" id="dateLine"></div>
     <div class="feast-line" id="feastLine">Loading today's readings…</div>
   </div>
@@ -305,50 +323,27 @@
   <div class="credit" id="credit"></div>
 </main>
 
-<!-- Settings sheet -->
+<!-- Menu sheet -->
 <div class="sheet-backdrop" id="sheetBackdrop"></div>
 <aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
   <div class="grabber"></div>
-  <h2 id="sheetTitle">Settings</h2>
 
-  <div class="group">
-    <label for="apiKey">API.Bible key</label>
-    <input id="apiKey" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Paste your API.Bible key">
-    <div class="help">
-      Free key at <a href="https://scripture.api.bible/signup" target="_blank" rel="noopener">scripture.api.bible</a>. Stored only on this device.
-      <span id="keyFingerprint" style="display:none; margin-left:6px; font-family:ui-monospace,Menlo,monospace;"></span>
-    </div>
-  </div>
+  <h3 id="sheetTitle">Recent readings</h3>
+  <ul class="reading-list" id="readingList">
+    <li class="reading-empty">Loading…</li>
+  </ul>
 
-  <div class="group">
-    <label for="apiBase">API endpoint</label>
-    <input id="apiBase" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://rest.api.bible/v1">
-    <div class="help">Whatever URL is shown in your API.Bible dashboard. We auto-append <code>/v1</code> if you omit it. Default: <code>https://rest.api.bible/v1</code>.</div>
-  </div>
-
-  <div class="group">
-    <label for="bibleSelect">Translation</label>
-    <div class="row">
-      <select id="bibleSelect"><option value="">(enter API key first)</option></select>
-      <button class="iconbtn" id="btnRefreshBibles" aria-label="Refresh translation list" title="Refresh">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      </button>
-    </div>
-    <div class="help">CSB ("Christian Standard Bible") will appear here after you connect. If you don't see CSB in the list, your key may not have access — try a different translation or contact API.Bible.</div>
-    <div id="bibleError" class="help" style="display:none; color:#b3361b; line-height:1.5; margin-top:10px;"></div>
-  </div>
-
-  <div class="group">
-    <label>Theme</label>
+  <h3>Display</h3>
+  <div class="display-row">
+    <span>Theme</span>
     <div class="seg" id="themeSeg" role="group" aria-label="Theme">
       <button data-theme="auto" aria-pressed="true">Auto</button>
       <button data-theme="light" aria-pressed="false">Light</button>
       <button data-theme="dark" aria-pressed="false">Dark</button>
     </div>
   </div>
-
-  <div class="group">
-    <label>Text size</label>
+  <div class="display-row">
+    <span>Size</span>
     <div class="seg" id="sizeSeg" role="group" aria-label="Text size">
       <button data-size="s" aria-pressed="false">S</button>
       <button data-size="m" aria-pressed="true">M</button>
@@ -356,75 +351,52 @@
       <button data-size="xl" aria-pressed="false">XL</button>
     </div>
   </div>
-
-  <div class="group">
-    <label for="proxyUrl">RSS proxy (advanced)</label>
-    <input id="proxyUrl" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
-    <div class="help">A CORS proxy is needed to read the lectionary feed from the browser. Defaults to a public proxy. For production, host your own (see SETUP.md).</div>
-  </div>
-
-  <button class="primary" id="btnSave">Save & reload readings</button>
-  <button class="secondary" id="btnClose">Close</button>
 </aside>
 
 <script>
 /* =====================================================================
-   Daily Word — a distraction-free RCL daily reading PWA (CSB via API.Bible)
+   Daily Word — distraction-free RCL daily reading PWA (CSB via API.Bible)
+   All API access goes through ./api.php on the same origin. The API.Bible
+   key and Bible ID live server-side — they never reach the client.
    ===================================================================== */
 
 (() => {
   'use strict';
 
-  // ---------- Config & storage ----------
-  const STORE_KEY = 'dailyword.settings.v1';
-  const FEED_URL  = 'https://lectionary.library.vanderbilt.edu/category/daily-readings-rss-feed/feed/';
-  const DEFAULT_PROXY = 'https://api.allorigins.win/raw?url=';
-  const DEFAULT_API_BASE = 'https://rest.api.bible/v1';
+  // ---------- Config ----------
+  // The single backend endpoint. Same-origin → no CORS, no key in client code.
+  const API_PATH = './api.php';
+  const STORE_KEY = 'dailyword.settings.v2';
 
+  // ---------- Settings (display only) ----------
   const settings = loadSettings();
-
   function loadSettings() {
     try {
       const s = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
-      return Object.assign({
-        apiKey: '',
-        bibleId: '',
-        bibleName: '',
-        theme: 'auto',
-        size: 'm',
-        proxy: DEFAULT_PROXY,
-        apiBase: DEFAULT_API_BASE,
-      }, s);
-    } catch { return { apiKey:'', bibleId:'', bibleName:'', theme:'auto', size:'m', proxy:DEFAULT_PROXY, apiBase:DEFAULT_API_BASE }; }
-  }
-  // Normalize an endpoint the user typed (strip trailing slash, append /v1 if missing).
-  function normalizeApiBase(s) {
-    if (!s) return DEFAULT_API_BASE;
-    let v = String(s).trim().replace(/\/+$/, '');
-    if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
-    if (!/\/v\d+$/i.test(v)) v += '/v1';
-    return v;
-  }
-  function getApiBase() {
-    return normalizeApiBase(settings.apiBase || DEFAULT_API_BASE);
+      return Object.assign({ theme: 'auto', size: 'm' }, s);
+    } catch { return { theme: 'auto', size: 'm' }; }
   }
   function saveSettings() { localStorage.setItem(STORE_KEY, JSON.stringify(settings)); }
 
-  // ---------- DOM ----------
-  const $ = sel => document.querySelector(sel);
-  const dateLine = $('#dateLine');
-  const feastLine = $('#feastLine');
-  const content = $('#content');
-  const credit = $('#credit');
+  // ---------- App state ----------
+  const state = {
+    allItems: [],         // parsed RSS items, sorted desc by pubDate
+    todaysItemKey: null,  // pubDate string of the item considered "today"
+    currentItemKey: null, // pubDate of the item currently displayed
+  };
 
-  const sheet = $('#sheet');
-  const sheetBackdrop = $('#sheetBackdrop');
-  const apiKeyInput = $('#apiKey');
-  const apiBaseInput = $('#apiBase');
-  const bibleSelect = $('#bibleSelect');
-  const proxyInput  = $('#proxyUrl');
-  const themeSeg = $('#themeSeg');
-  const sizeSeg = $('#sizeSeg');
+  // ---------- DOM refs ----------
+  const $ = sel => document.querySelector(sel);
+  const dateLine     = $('#dateLine');
+  const feastLine    = $('#feastLine');
+  const backToToday  = $('#backToToday');
+  const content      = $('#content');
+  const credit       = $('#credit');
+  const sheet        = $('#sheet');
+  const sheetBackdrop= $('#sheetBackdrop');
+  const themeSeg     = $('#themeSeg');
+  const sizeSeg      = $('#sizeSeg');
+  const readingList  = $('#readingList');
 
   // ---------- Theme & size ----------
   function applyTheme(t) {
@@ -446,168 +418,58 @@
     const b = e.target.closest('button'); if (!b) return;
     settings.size = b.dataset.size; saveSettings(); applySize(settings.size);
   });
-
   applyTheme(settings.theme);
   applySize(settings.size);
 
-  // ---------- Settings sheet ----------
+  // ---------- Sheet open/close ----------
   function openSheet() {
-    apiKeyInput.value = settings.apiKey || '';
-    apiBaseInput.value = settings.apiBase || DEFAULT_API_BASE;
-    proxyInput.value  = settings.proxy || DEFAULT_PROXY;
-    updateKeyFingerprint();
-    hideBibleError();
+    renderReadingList();
     sheet.classList.add('open');
     sheetBackdrop.classList.add('open');
-    if (settings.apiKey) loadBibles().catch(()=>{});
   }
   function closeSheet() {
     sheet.classList.remove('open');
     sheetBackdrop.classList.remove('open');
   }
-  $('#btnSettings').addEventListener('click', openSheet);
-  $('#btnClose').addEventListener('click', closeSheet);
+  $('#btnMenu').addEventListener('click', openSheet);
   sheetBackdrop.addEventListener('click', closeSheet);
-  $('#btnRefreshBibles').addEventListener('click', () => {
-    settings.apiKey = cleanKey(apiKeyInput.value);
-    settings.apiBase = normalizeApiBase(apiBaseInput.value);
-    apiKeyInput.value = settings.apiKey;
-    apiBaseInput.value = settings.apiBase;
-    updateKeyFingerprint();
-    loadBibles();
-  });
-  $('#btnSave').addEventListener('click', async () => {
-    settings.apiKey = cleanKey(apiKeyInput.value);
-    settings.apiBase = normalizeApiBase(apiBaseInput.value);
-    settings.proxy  = proxyInput.value.trim() || DEFAULT_PROXY;
-    settings.bibleId = bibleSelect.value || settings.bibleId;
-    const opt = bibleSelect.options[bibleSelect.selectedIndex];
-    if (opt) settings.bibleName = opt.textContent;
-    saveSettings();
-    closeSheet();
-    await renderToday();
-  });
-  // Live fingerprint update as the user types/pastes into the key field
-  apiKeyInput.addEventListener('input', () => {
-    const cleaned = cleanKey(apiKeyInput.value);
-    if (cleaned !== apiKeyInput.value) apiKeyInput.value = cleaned;
-    updateKeyFingerprint();
-  });
-
-  // Strip every kind of invisible character a paste might smuggle in:
-  // ASCII whitespace, NBSP, zero-width chars, BOM, plus stray quotes around the key.
-  function cleanKey(s) {
-    if (!s) return '';
-    // ASCII whitespace, NBSP (U+00A0), zero-width chars (U+200B-U+200F),
-    // bidi/formatting marks (U+202A-U+202E, U+2060), BOM (U+FEFF).
-    return String(s)
-      .replace(/[\s\u00a0\u200b-\u200f\u202a-\u202e\u2060\ufeff]/g, '')
-      .replace(/^["'`\u2018\u2019\u201c\u201d]+|["'`\u2018\u2019\u201c\u201d]+$/g, '')
-      .trim();
-  }
-  function updateKeyFingerprint() {
-    const k = cleanKey(apiKeyInput.value);
-    const fp = document.getElementById('keyFingerprint');
-    if (!fp) return;
-    if (!k) { fp.style.display = 'none'; fp.textContent = ''; return; }
-    const head = k.slice(0, 4), tail = k.slice(-4);
-    fp.textContent = `Key: ${head}…${tail} (${k.length} chars)`;
-    fp.style.display = 'inline';
-  }
-
-  // ---------- API.Bible: list available Bibles for this key ----------
-  async function loadBibles() {
-    if (!settings.apiKey) { bibleSelect.innerHTML = '<option value="">(enter API key first)</option>'; return; }
-    bibleSelect.innerHTML = '<option value="">Loading…</option>';
-    try {
-      const resp = await fetch(getApiBase() + '/bibles?language=eng', { headers: { 'api-key': settings.apiKey } });
-      if (!resp.ok) {
-        // Try to surface the server's actual error message so we know what was wrong
-        let serverMsg = '';
-        try {
-          const errBody = await resp.text();
-          try {
-            const j = JSON.parse(errBody);
-            serverMsg = j.error || j.message || j.statusMessage || '';
-          } catch { serverMsg = errBody.slice(0, 140); }
-        } catch {}
-        const k = settings.apiKey;
-        const fp = k ? `${k.slice(0,4)}…${k.slice(-4)} (${k.length} chars)` : '(empty)';
-        let hint = '';
-        if (resp.status === 401) {
-          hint = ' — the key was rejected. Double-check: (1) you copied the WHOLE key without hidden whitespace, (2) you clicked the email-verification link API.Bible sent you, (3) you pasted from your "API Key" — not your "Application ID".';
-        } else if (resp.status === 403) {
-          hint = ' — your key is valid but this endpoint is forbidden for it. Check that your application is approved.';
-        } else if (resp.status === 429) {
-          hint = ' — rate-limited. Wait a minute and try again.';
-        }
-        throw new Error(`HTTP ${resp.status}${serverMsg ? ': ' + serverMsg : ''}${hint} [Sent key: ${fp}]`);
-      }
-      const data = await resp.json();
-      const list = (data.data || []).slice().sort((a,b) => {
-        // Surface CSB to the top
-        const aCsb = /CSB|Christian Standard/i.test(a.name + ' ' + a.abbreviation);
-        const bCsb = /CSB|Christian Standard/i.test(b.name + ' ' + b.abbreviation);
-        if (aCsb && !bCsb) return -1;
-        if (bCsb && !aCsb) return 1;
-        return a.name.localeCompare(b.name);
-      });
-      bibleSelect.innerHTML = '';
-      for (const b of list) {
-        const o = document.createElement('option');
-        o.value = b.id;
-        o.textContent = `${b.abbreviationLocal || b.abbreviation} — ${b.name}`;
-        bibleSelect.appendChild(o);
-      }
-      if (settings.bibleId && [...bibleSelect.options].some(o => o.value === settings.bibleId)) {
-        bibleSelect.value = settings.bibleId;
-      } else if (list.length) {
-        bibleSelect.value = list[0].id;
-      }
-      hideBibleError();
-    } catch (err) {
-      bibleSelect.innerHTML = `<option value="">— couldn't load —</option>`;
-      showBibleError(err.message);
-    }
-  }
-  function showBibleError(msg) {
-    const el = document.getElementById('bibleError');
-    if (!el) return;
-    el.textContent = msg;
-    el.style.display = 'block';
-  }
-  function hideBibleError() {
-    const el = document.getElementById('bibleError');
-    if (!el) return;
-    el.textContent = '';
-    el.style.display = 'none';
-  }
+  $('#btnHome').addEventListener('click', () => { viewToday(); });
+  backToToday.addEventListener('click', () => { viewToday(); });
 
   // ---------- Date helpers ----------
-  function fmtTodayLong() {
-    return new Date().toLocaleDateString(undefined, {
-      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
-    });
+  function parsePubDate(s) {
+    if (!s) return null;
+    const d = new Date(s);
+    return isNaN(d) ? null : d;
   }
   function isSameLocalDay(a, b) {
     return a.getFullYear() === b.getFullYear()
         && a.getMonth() === b.getMonth()
         && a.getDate() === b.getDate();
   }
+  function fmtLongUpper(d) {
+    return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  }
+  function fmtMenuDate(d) {
+    const sameYear = d.getFullYear() === new Date().getFullYear();
+    return d.toLocaleDateString(undefined,
+      sameYear ? { weekday: 'long', month: 'long', day: 'numeric' }
+               : { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  }
 
-  // ---------- RSS fetch & parse ----------
+  // ---------- RSS feed (via api.php) ----------
   async function fetchFeed() {
-    const proxy = settings.proxy || DEFAULT_PROXY;
-    const url = proxy + encodeURIComponent(FEED_URL);
-    const resp = await fetch(url, { cache: 'no-store' });
-    if (!resp.ok) throw new Error(`Feed fetch failed (HTTP ${resp.status}). Check the RSS proxy in Settings.`);
+    const resp = await fetch(API_PATH + '?action=feed', { cache: 'no-store' });
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => '');
+      throw new Error(`feed HTTP ${resp.status}${body ? ': ' + body.slice(0,160) : ''}`);
+    }
     return await resp.text();
   }
 
   function parseFeed(xmlText) {
     const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
-    const parserError = doc.querySelector('parsererror');
-    if (parserError) throw new Error('Could not parse RSS feed.');
+    if (doc.querySelector('parsererror')) throw new Error('Could not parse RSS feed.');
     const items = [...doc.querySelectorAll('item')].map(it => ({
       title: text(it, 'title'),
       pubDate: text(it, 'pubDate'),
@@ -624,26 +486,30 @@
 
   function pickTodaysItem(items) {
     const today = new Date();
-    // 1) Prefer item whose pubDate matches today (local)
     for (const it of items) {
-      if (!it.pubDate) continue;
-      const d = new Date(it.pubDate);
-      if (!isNaN(d) && isSameLocalDay(d, today)) return it;
+      const d = parsePubDate(it.pubDate);
+      if (d && isSameLocalDay(d, today)) return it;
     }
-    // 2) Fallback: most recent item not in the future
     const past = items
-      .map(it => ({ it, d: new Date(it.pubDate) }))
-      .filter(x => !isNaN(x.d) && x.d <= today)
+      .map(it => ({ it, d: parsePubDate(it.pubDate) }))
+      .filter(x => x.d && x.d <= today)
       .sort((a,b) => b.d - a.d);
     if (past.length) return past[0].it;
-    // 3) Last resort: first item
     return items[0];
   }
 
-  // ---------- Reference extraction ----------
-  // Matches refs like "Genesis 1:1-2:3", "1 Corinthians 13", "Psalm 23", "Acts 2:1-21",
-  // "John 3:16-21, 23-25", "Song of Solomon 2:8-13".
-  // Books: 1-3 prefix optional, then 1-3 capitalized words.
+  // ---------- Title cleaner (avoids redundant date headings) ----------
+  function cleanTitle(rawTitle) {
+    let t = (rawTitle || '').replace(/&amp;/g, '&').replace(/&#8211;/g, '–').replace(/&#8212;/g, '—').trim();
+    t = t.replace(/^\s*Daily Readings\s+for\s+/i, '').trim();
+    const WEEKDAY = '(?:Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday)';
+    const dateOnly = new RegExp('^(?:' + WEEKDAY + ',\\s+)?[A-Za-z]+\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}\\.?$');
+    if (dateOnly.test(t)) return '';
+    const trailingDate = new RegExp('[,\\s—–\\-]+(?:' + WEEKDAY + ',\\s+)?[A-Za-z]+\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}\\.?$');
+    return t.replace(trailingDate, '').trim();
+  }
+
+  // ---------- Bible book → USFM mapping ----------
   const BOOK_NAMES = [
     "Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth",
     "1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther",
@@ -671,89 +537,57 @@
     "James":"JAS","1 Peter":"1PE","2 Peter":"2PE","1 John":"1JN","2 John":"2JN","3 John":"3JN",
     "Jude":"JUD","Revelation":"REV"
   };
-  // Build a regex source for any book name (longer first)
-  const bookAlt = BOOK_NAMES
-    .slice()
-    .sort((a,b) => b.length - a.length)
-    .map(n => n.replace(/ /g, '\\s+'))
-    .join('|');
-
-  // Reference: BOOK + space + chapter[:verse[-verse]]; allow comma chains (no chapter prefix re-needed for v-only adds)
-  // We'll capture each "BOOK + chapter(:verses)?" + an optional continuation segment.
+  const bookAlt = BOOK_NAMES.slice().sort((a,b) => b.length - a.length).map(n => n.replace(/ /g, '\\s+')).join('|');
   const REF_REGEX = new RegExp(
     '\\b(' + bookAlt + ')\\s+(\\d+(?::\\d+(?:[a-c])?)?(?:[\\u2013\\u2014\\-]\\s*\\d+(?::\\d+(?:[a-c])?)?)?(?:\\s*,\\s*\\d+(?::\\d+(?:[a-c])?)?(?:[\\u2013\\u2014\\-]\\s*\\d+(?::\\d+(?:[a-c])?)?)?)*)',
     'g'
   );
 
   function extractRefsFromHtml(html) {
-    // Strip HTML to plaintext for a cleaner pass, but keep newlines from <br>/<li>/<p> as separators
     const tmp = document.createElement('div');
     tmp.innerHTML = (html || '').replace(/<\/(p|li|div|br|h[1-6])>/gi, '$&\n').replace(/<br\s*\/?>/gi, '\n');
     const text = tmp.textContent || '';
     const found = [];
     const seen = new Set();
+    REF_REGEX.lastIndex = 0;
     let m;
     while ((m = REF_REGEX.exec(text)) !== null) {
       const book = normalizeBook(m[1]);
       if (!book) continue;
-      const ref = `${book} ${m[2].replace(/\s+/g,' ')}`.replace(/\s+,/g, ',');
+      const ref = `${book} ${m[2].replace(/\s+/g, ' ')}`.replace(/\s+,/g, ',');
       if (!seen.has(ref)) { seen.add(ref); found.push(ref); }
     }
     return found;
   }
-
   function normalizeBook(s) {
-    const compact = s.replace(/\s+/g,' ').trim();
-    // direct match
+    const compact = s.replace(/\s+/g, ' ').trim();
     if (BOOK_USFM[compact]) return compact;
-    // Title-case match attempt
-    const tc = compact.replace(/\b\w/g, c => c.toUpperCase());
-    if (BOOK_USFM[tc]) return tc;
-    // Try lowercase comparison
-    const found = BOOK_NAMES.find(n => n.toLowerCase() === compact.toLowerCase());
-    return found || null;
+    return BOOK_NAMES.find(n => n.toLowerCase() === compact.toLowerCase()) || null;
   }
 
-  // Convert a reference string like "Genesis 1:1-2:3" or "Psalm 23" into one or more API.Bible passageIds.
-  // Returns array of { passageId, label } where label is the human reference for that segment.
   function refToPassageIds(ref) {
-    // Split the book off
     const m = ref.match(new RegExp('^(' + bookAlt + ')\\s+(.+)$'));
     if (!m) return [];
     const book = normalizeBook(m[1]);
     if (!book) return [];
     const usfm = BOOK_USFM[book];
-    const rest = m[2];
-
-    // Split commas. Each segment may carry chapter context from the previous one.
-    const segs = rest.split(/\s*,\s*/);
+    const segs = m[2].split(/\s*,\s*/);
     const out = [];
     let lastChapter = null;
 
     for (const seg of segs) {
-      // Normalize en/em dashes
       const s = seg.replace(/[–—]/g, '-').trim();
-      // Strip a/b/c markers (verse part designators) from API id; keep label as-is.
       const stripParts = (x) => x.replace(/[a-c]\b/g, '');
-      let startChap, startVerse, endChap, endVerse;
-
-      // Possible shapes:
-      //   "23"            chapter only (whole chapter)
-      //   "23:1"          chapter:verse
-      //   "23:1-12"       chapter, verse range
-      //   "23:1-24:3"     cross-chapter range
-      //   "1-3"           verses 1-3 (uses lastChapter context)
-      //   "5"             verse 5 (uses lastChapter context if previous had verses)
       const ranged = stripParts(s).split(/\s*-\s*/);
-
       function parsePart(p) {
         if (!p) return null;
         const cv = p.split(':');
         if (cv.length === 2) return { chapter: +cv[0], verse: +cv[1] };
-        return { chapter: null, verse: +cv[0], whole: false, raw: cv[0] };
+        return { chapter: null, verse: +cv[0] };
       }
       const a = parsePart(ranged[0]);
       const b = ranged[1] ? parsePart(ranged[1]) : null;
+      let startChap, startVerse, endChap, endVerse;
 
       if (a) {
         if (a.chapter !== null) { startChap = a.chapter; startVerse = a.verse; lastChapter = a.chapter; }
@@ -763,17 +597,15 @@
       if (b) {
         if (b.chapter !== null) { endChap = b.chapter; endVerse = b.verse; lastChapter = b.chapter; }
         else { endChap = startChap; endVerse = b.verse; }
-      } else {
-        endChap = startChap; endVerse = startVerse;
-      }
+      } else { endChap = startChap; endVerse = startVerse; }
 
       let passageId;
       if (startVerse == null && endVerse == null) {
-        passageId = `${usfm}.${startChap}`; // whole chapter
+        passageId = `${usfm}.${startChap}`;
       } else if (startVerse != null && endVerse == null) {
         passageId = `${usfm}.${startChap}.${startVerse}`;
       } else if (startChap === endChap && startVerse === endVerse) {
-        passageId = `${usfm}.${startChap}.${startVerse}`; // single verse
+        passageId = `${usfm}.${startChap}.${startVerse}`;
       } else {
         passageId = `${usfm}.${startChap}.${startVerse}-${usfm}.${endChap}.${endVerse}`;
       }
@@ -782,18 +614,21 @@
     return out;
   }
 
-  // ---------- API.Bible: fetch passage HTML ----------
+  // ---------- Passage fetch (via api.php) ----------
   async function fetchPassage(passageId) {
-    const url = `${getApiBase()}/bibles/${encodeURIComponent(settings.bibleId)}/passages/${encodeURIComponent(passageId)}` +
-                `?content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false`;
-    const resp = await fetch(url, { headers: { 'api-key': settings.apiKey } });
-    if (!resp.ok) throw new Error(`Passage ${passageId} → HTTP ${resp.status}`);
+    const url = API_PATH + '?action=passage&id=' + encodeURIComponent(passageId);
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => '');
+      throw new Error(`HTTP ${resp.status}${body ? ': ' + body.slice(0,140) : ''}`);
+    }
     const data = await resp.json();
     return data.data;
   }
 
-  // ---------- Render ----------
-  function renderState({title, body, action}) {
+  // ---------- Render: state messages ----------
+  function renderState({ title, body, action }) {
+    feastLine.style.display = '';
     feastLine.textContent = '';
     content.innerHTML = '';
     const wrap = document.createElement('div');
@@ -803,7 +638,13 @@
       t.className = 'title'; t.textContent = title; wrap.appendChild(t);
     }
     if (body) {
-      const p = document.createElement('div'); p.textContent = body; wrap.appendChild(p);
+      const parts = String(body).split(/\n\s*\n/);
+      for (const part of parts) {
+        const p = document.createElement('div');
+        p.style.marginBottom = '0.8em';
+        p.textContent = part;
+        wrap.appendChild(p);
+      }
     }
     if (action) {
       const b = document.createElement('button'); b.textContent = action.label;
@@ -812,49 +653,30 @@
     content.appendChild(wrap);
   }
 
+  // ---------- Render: heading + back-to-today affordance ----------
   function renderHeading(item) {
-    dateLine.textContent = fmtTodayLong();
-    feastLine.textContent = (item?.title || '').replace(/&amp;/g, '&');
+    const d = parsePubDate(item.pubDate) || new Date();
+    dateLine.textContent = fmtLongUpper(d);
+    const title = cleanTitle(item.title);
+    if (title) {
+      feastLine.textContent = title;
+      feastLine.style.display = '';
+    } else {
+      feastLine.textContent = '';
+      feastLine.style.display = 'none';
+    }
+    const isToday = state.todaysItemKey && item.pubDate === state.todaysItemKey;
+    backToToday.hidden = isToday;
   }
 
-  function renderPassage(label, contentHtml) {
-    const sect = document.createElement('section');
-    sect.className = 'passage';
-    const ref = document.createElement('div');
-    ref.className = 'passage-ref';
-    ref.textContent = label;
-    const body = document.createElement('div');
-    body.className = 'passage-body';
-    body.innerHTML = contentHtml;
-    sect.appendChild(ref);
-    sect.appendChild(body);
-    return sect;
-  }
+  // ---------- Render: a single item's readings ----------
+  async function viewItem(item) {
+    state.currentItemKey = item.pubDate;
+    closeSheet();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    renderHeading(item);
 
-  async function renderToday() {
-    // Configuration gates
-    if (!settings.apiKey) {
-      renderState({
-        title: "Welcome",
-        body: "To begin, add your API.Bible key and choose the CSB translation in Settings.",
-        action: { label: "Open Settings", fn: openSheet }
-      });
-      credit.textContent = '';
-      return;
-    }
-    if (!settings.bibleId) {
-      renderState({
-        title: "Choose a translation",
-        body: "Open Settings and pick CSB (or another translation) from the list.",
-        action: { label: "Open Settings", fn: openSheet }
-      });
-      credit.textContent = '';
-      return;
-    }
-
-    feastLine.textContent = "Loading today's readings…";
     content.innerHTML = '';
-    // Show skeletons
     for (let i = 0; i < 3; i++) {
       const sk = document.createElement('div');
       sk.className = 'passage';
@@ -869,45 +691,26 @@
       content.appendChild(sk);
     }
 
-    let item, refs;
-    try {
-      const xml = await fetchFeed();
-      const items = parseFeed(xml);
-      if (!items.length) throw new Error('Lectionary feed had no items.');
-      item = pickTodaysItem(items);
-      const haystack = item.content || item.description || '';
-      refs = extractRefsFromHtml(haystack);
-      if (!refs.length) {
-        // Fallback: pull refs from the title (some feeds list them there)
-        refs = extractRefsFromHtml(item.title || '');
-      }
-    } catch (err) {
-      renderState({
-        title: "Couldn't load today's readings",
-        body: err.message + ' If this persists, change the RSS proxy in Settings or wait a moment and retry.',
-        action: { label: "Try again", fn: renderToday }
-      });
-      return;
-    }
+    const haystack = item.content || item.description || '';
+    let refs = extractRefsFromHtml(haystack);
+    if (!refs.length) refs = extractRefsFromHtml(item.title || '');
 
-    renderHeading(item);
     content.innerHTML = '';
 
     if (!refs.length) {
       renderState({
-        title: "No references found",
-        body: "Today's lectionary entry didn't contain a recognizable scripture reference. You can open the source link or try again later.",
-        action: { label: "Open lectionary", fn: () => { if (item.link) location.href = item.link; } }
+        title: 'No references found',
+        body: "This day's lectionary entry didn't contain a recognizable scripture reference.",
+        action: item.link ? { label: 'Open lectionary page', fn: () => { location.href = item.link; } } : null,
       });
       return;
     }
 
-    let firstError = null;
     for (let i = 0; i < refs.length; i++) {
       const ref = refs[i];
       const segs = refToPassageIds(ref);
       if (!segs.length) continue;
-      // Concatenate segments under one ref heading
+
       const sect = document.createElement('section');
       sect.className = 'passage';
       const refEl = document.createElement('div');
@@ -921,13 +724,11 @@
       for (const s of segs) {
         try {
           const data = await fetchPassage(s.passageId);
-          const html = data.content || '';
+          const html = (data && data.content) || '';
           const piece = document.createElement('div');
           piece.innerHTML = html;
-          // Move children into bodyEl
           while (piece.firstChild) bodyEl.appendChild(piece.firstChild);
         } catch (err) {
-          firstError = firstError || err;
           const e = document.createElement('p');
           e.style.color = 'var(--ink-faint)';
           e.style.fontStyle = 'italic';
@@ -935,18 +736,103 @@
           bodyEl.appendChild(e);
         }
       }
-      // Ornament between readings (but not after the last)
       if (i < refs.length - 1) {
         const orn = document.createElement('div');
         orn.className = 'ornament';
         content.appendChild(orn);
       }
     }
-
-    credit.textContent = `${settings.bibleName || 'Translation'} · Lectionary by Vanderbilt Library`;
+    credit.textContent = 'CSB · Lectionary by Vanderbilt Library';
   }
 
-  // ---------- Service worker registration ----------
+  // ---------- Top-level: load feed + view today (or a specific item) ----------
+  async function loadFeedIfNeeded() {
+    if (state.allItems.length) return;
+    const xml = await fetchFeed();
+    const items = parseFeed(xml).filter(it => parsePubDate(it.pubDate));
+    items.sort((a, b) => parsePubDate(b.pubDate) - parsePubDate(a.pubDate));
+    state.allItems = items;
+    const todays = pickTodaysItem(items);
+    state.todaysItemKey = todays ? todays.pubDate : null;
+  }
+
+  async function viewToday() {
+    feastLine.style.display = '';
+    feastLine.textContent = "Loading today's readings…";
+    backToToday.hidden = true;
+
+    try {
+      await loadFeedIfNeeded();
+    } catch (err) {
+      renderState({
+        title: "Couldn't load today's readings",
+        body: err.message + '\n\nIf this persists, try again in a moment, or check that ./api.php is reachable on your server.',
+        action: { label: 'Try again', fn: viewToday }
+      });
+      return;
+    }
+
+    if (!state.allItems.length) {
+      renderState({ title: 'Lectionary feed is empty', body: 'The RSS feed returned no items.' });
+      return;
+    }
+
+    const todays = state.allItems.find(it => it.pubDate === state.todaysItemKey) || state.allItems[0];
+    await viewItem(todays);
+  }
+
+  async function viewItemByKey(key) {
+    const item = state.allItems.find(it => it.pubDate === key);
+    if (!item) return viewToday();
+    await viewItem(item);
+  }
+
+  // ---------- Menu rendering ----------
+  function renderReadingList() {
+    if (!state.allItems.length) {
+      readingList.innerHTML = '<li class="reading-empty">No readings loaded yet.</li>';
+      return;
+    }
+    readingList.innerHTML = '';
+    for (const item of state.allItems) {
+      const d = parsePubDate(item.pubDate);
+      if (!d) continue;
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.className = 'reading-item';
+      btn.type = 'button';
+      if (item.pubDate === state.currentItemKey) btn.classList.add('current');
+
+      const isToday = item.pubDate === state.todaysItemKey;
+      const row = document.createElement('div');
+      row.className = 'ri-row';
+      if (isToday) {
+        const tag = document.createElement('span');
+        tag.className = 'ri-today';
+        tag.textContent = 'Today';
+        row.appendChild(tag);
+      }
+      const dateEl = document.createElement('span');
+      dateEl.className = 'ri-date';
+      dateEl.textContent = fmtMenuDate(d);
+      row.appendChild(dateEl);
+      btn.appendChild(row);
+
+      const feast = cleanTitle(item.title);
+      if (feast) {
+        const feastEl = document.createElement('span');
+        feastEl.className = 'ri-feast';
+        feastEl.textContent = feast;
+        btn.appendChild(feastEl);
+      }
+
+      btn.addEventListener('click', () => viewItemByKey(item.pubDate));
+      li.appendChild(btn);
+      readingList.appendChild(li);
+    }
+  }
+
+  // ---------- Service worker ----------
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -954,7 +840,7 @@
   }
 
   // ---------- Boot ----------
-  renderToday();
+  viewToday();
 
 })();
 </script>
