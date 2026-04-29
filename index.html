@@ -380,9 +380,10 @@
 
   // ---------- App state ----------
   const state = {
-    allItems: [],         // parsed RSS items, sorted desc by pubDate
-    todaysItemKey: null,  // pubDate string of the item considered "today"
-    currentItemKey: null, // pubDate of the item currently displayed
+    allItems: [],            // parsed RSS items, sorted desc by pubDate
+    defaultItemKey: null,    // what we land on by default (today if available, else most recent past)
+    todayCalendarKey: null,  // pubDate of an item whose date literally matches today's local calendar — null if feed hasn't caught up
+    currentItemKey: null,    // pubDate of the item currently displayed
   };
 
   // ---------- DOM refs ----------
@@ -447,6 +448,36 @@
         && a.getMonth() === b.getMonth()
         && a.getDate() === b.getDate();
   }
+
+  const MONTH_NAMES = [
+    'january','february','march','april','may','june',
+    'july','august','september','october','november','december'
+  ];
+
+  // Extract the reading's actual calendar date from the item title.
+  // Titles look like "Daily Readings for Wednesday, April 29, 2026" or
+  // "Easter Sunday — April 5, 2026". The date in the title represents the day
+  // the reading is FOR — which is what we care about. pubDate is just the
+  // publish timestamp and can fall on the previous local day if Vanderbilt
+  // publishes late at night and the user is west of the feed's timezone.
+  function parseDateFromTitle(title) {
+    if (!title) return null;
+    const decoded = String(title)
+      .replace(/&amp;/g, '&').replace(/&#8211;/g, '–').replace(/&#8212;/g, '—');
+    const m = decoded.match(/([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})/);
+    if (!m) return null;
+    const month = MONTH_NAMES.indexOf(m[1].toLowerCase());
+    if (month < 0) return null;
+    const day = parseInt(m[2], 10);
+    const year = parseInt(m[3], 10);
+    if (!day || !year) return null;
+    return new Date(year, month, day, 12, 0, 0); // noon local — DST-safe
+  }
+
+  // Best source of truth for what calendar day a reading is for.
+  function getReadingDate(item) {
+    return parseDateFromTitle(item && item.title) || parsePubDate(item && item.pubDate);
+  }
   function fmtLongUpper(d) {
     return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   }
@@ -484,16 +515,25 @@
     }
   }
 
-  function pickTodaysItem(items) {
+  // STRICT: an item whose reading-date is today's local date, or null.
+  function pickTodayCalendarItem(items) {
     const today = new Date();
     for (const it of items) {
-      const d = parsePubDate(it.pubDate);
+      const d = getReadingDate(it);
       if (d && isSameLocalDay(d, today)) return it;
     }
+    return null;
+  }
+  // Today's match if it exists; otherwise the most recent past item.
+  // This is what we land on when the user opens the app or taps "Back to today".
+  function pickDefaultItem(items) {
+    const today = new Date();
+    const strict = pickTodayCalendarItem(items);
+    if (strict) return strict;
     const past = items
-      .map(it => ({ it, d: parsePubDate(it.pubDate) }))
+      .map(it => ({ it, d: getReadingDate(it) }))
       .filter(x => x.d && x.d <= today)
-      .sort((a,b) => b.d - a.d);
+      .sort((a, b) => b.d - a.d);
     if (past.length) return past[0].it;
     return items[0];
   }
@@ -655,7 +695,7 @@
 
   // ---------- Render: heading + back-to-today affordance ----------
   function renderHeading(item) {
-    const d = parsePubDate(item.pubDate) || new Date();
+    const d = getReadingDate(item) || new Date();
     dateLine.textContent = fmtLongUpper(d);
     const title = cleanTitle(item.title);
     if (title) {
@@ -665,8 +705,10 @@
       feastLine.textContent = '';
       feastLine.style.display = 'none';
     }
-    const isToday = state.todaysItemKey && item.pubDate === state.todaysItemKey;
-    backToToday.hidden = isToday;
+    // Hide "Back to today" when the user is on the default view (whether or not
+    // that view's date literally matches today — feeds publish on their own schedule).
+    const isDefault = state.defaultItemKey && item.pubDate === state.defaultItemKey;
+    backToToday.hidden = isDefault;
   }
 
   // ---------- Render: a single item's readings ----------
@@ -749,11 +791,14 @@
   async function loadFeedIfNeeded() {
     if (state.allItems.length) return;
     const xml = await fetchFeed();
-    const items = parseFeed(xml).filter(it => parsePubDate(it.pubDate));
-    items.sort((a, b) => parsePubDate(b.pubDate) - parsePubDate(a.pubDate));
+    // Sort by reading-date desc (more reliable than pubDate across timezones).
+    const items = parseFeed(xml).filter(it => getReadingDate(it));
+    items.sort((a, b) => getReadingDate(b) - getReadingDate(a));
     state.allItems = items;
-    const todays = pickTodaysItem(items);
-    state.todaysItemKey = todays ? todays.pubDate : null;
+    const strict = pickTodayCalendarItem(items);
+    state.todayCalendarKey = strict ? strict.pubDate : null;
+    const def = pickDefaultItem(items);
+    state.defaultItemKey = def ? def.pubDate : null;
   }
 
   async function viewToday() {
@@ -777,8 +822,8 @@
       return;
     }
 
-    const todays = state.allItems.find(it => it.pubDate === state.todaysItemKey) || state.allItems[0];
-    await viewItem(todays);
+    const def = state.allItems.find(it => it.pubDate === state.defaultItemKey) || state.allItems[0];
+    await viewItem(def);
   }
 
   async function viewItemByKey(key) {
@@ -795,7 +840,7 @@
     }
     readingList.innerHTML = '';
     for (const item of state.allItems) {
-      const d = parsePubDate(item.pubDate);
+      const d = getReadingDate(item);
       if (!d) continue;
       const li = document.createElement('li');
       const btn = document.createElement('button');
@@ -803,7 +848,9 @@
       btn.type = 'button';
       if (item.pubDate === state.currentItemKey) btn.classList.add('current');
 
-      const isToday = item.pubDate === state.todaysItemKey;
+      // The "TODAY" badge appears only when an item's pubDate literally matches
+      // today's calendar — never on a fallback "most recent" item.
+      const isToday = state.todayCalendarKey && item.pubDate === state.todayCalendarKey;
       const row = document.createElement('div');
       row.className = 'ri-row';
       if (isToday) {
