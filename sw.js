@@ -6,7 +6,7 @@
    - RSS feed: network-only (always fresh; today's date matters).
 */
 
-const VERSION = 'dailyword-v2';
+const VERSION = 'dailyword-v3';
 const SHELL = [
   './',
   './index.html',
@@ -40,7 +40,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // API.Bible passages: network-first, then cache fallback
-  if (url.hostname === 'api.scripture.api.bible') {
+  if (url.hostname === 'rest.api.bible' || url.hostname === 'api.scripture.api.bible') {
     event.respondWith((async () => {
       try {
         const fresh = await fetch(req);

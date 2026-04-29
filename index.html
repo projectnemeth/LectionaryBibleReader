@@ -313,11 +313,17 @@
 
   <div class="group">
     <label for="apiKey">API.Bible key</label>
-    <input id="apiKey" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Paste your scripture.api.bible key">
+    <input id="apiKey" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Paste your API.Bible key">
     <div class="help">
       Free key at <a href="https://scripture.api.bible/signup" target="_blank" rel="noopener">scripture.api.bible</a>. Stored only on this device.
       <span id="keyFingerprint" style="display:none; margin-left:6px; font-family:ui-monospace,Menlo,monospace;"></span>
     </div>
+  </div>
+
+  <div class="group">
+    <label for="apiBase">API endpoint</label>
+    <input id="apiBase" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://rest.api.bible/v1">
+    <div class="help">Whatever URL is shown in your API.Bible dashboard. We auto-append <code>/v1</code> if you omit it. Default: <code>https://rest.api.bible/v1</code>.</div>
   </div>
 
   <div class="group">
@@ -373,7 +379,7 @@
   const STORE_KEY = 'dailyword.settings.v1';
   const FEED_URL  = 'https://lectionary.library.vanderbilt.edu/category/daily-readings-rss-feed/feed/';
   const DEFAULT_PROXY = 'https://api.allorigins.win/raw?url=';
-  const API_BASE  = 'https://api.scripture.api.bible/v1';
+  const DEFAULT_API_BASE = 'https://rest.api.bible/v1';
 
   const settings = loadSettings();
 
@@ -387,8 +393,20 @@
         theme: 'auto',
         size: 'm',
         proxy: DEFAULT_PROXY,
+        apiBase: DEFAULT_API_BASE,
       }, s);
-    } catch { return { apiKey:'', bibleId:'', bibleName:'', theme:'auto', size:'m', proxy:DEFAULT_PROXY }; }
+    } catch { return { apiKey:'', bibleId:'', bibleName:'', theme:'auto', size:'m', proxy:DEFAULT_PROXY, apiBase:DEFAULT_API_BASE }; }
+  }
+  // Normalize an endpoint the user typed (strip trailing slash, append /v1 if missing).
+  function normalizeApiBase(s) {
+    if (!s) return DEFAULT_API_BASE;
+    let v = String(s).trim().replace(/\/+$/, '');
+    if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+    if (!/\/v\d+$/i.test(v)) v += '/v1';
+    return v;
+  }
+  function getApiBase() {
+    return normalizeApiBase(settings.apiBase || DEFAULT_API_BASE);
   }
   function saveSettings() { localStorage.setItem(STORE_KEY, JSON.stringify(settings)); }
 
@@ -402,6 +420,7 @@
   const sheet = $('#sheet');
   const sheetBackdrop = $('#sheetBackdrop');
   const apiKeyInput = $('#apiKey');
+  const apiBaseInput = $('#apiBase');
   const bibleSelect = $('#bibleSelect');
   const proxyInput  = $('#proxyUrl');
   const themeSeg = $('#themeSeg');
@@ -434,6 +453,7 @@
   // ---------- Settings sheet ----------
   function openSheet() {
     apiKeyInput.value = settings.apiKey || '';
+    apiBaseInput.value = settings.apiBase || DEFAULT_API_BASE;
     proxyInput.value  = settings.proxy || DEFAULT_PROXY;
     updateKeyFingerprint();
     hideBibleError();
@@ -450,12 +470,15 @@
   sheetBackdrop.addEventListener('click', closeSheet);
   $('#btnRefreshBibles').addEventListener('click', () => {
     settings.apiKey = cleanKey(apiKeyInput.value);
+    settings.apiBase = normalizeApiBase(apiBaseInput.value);
     apiKeyInput.value = settings.apiKey;
+    apiBaseInput.value = settings.apiBase;
     updateKeyFingerprint();
     loadBibles();
   });
   $('#btnSave').addEventListener('click', async () => {
     settings.apiKey = cleanKey(apiKeyInput.value);
+    settings.apiBase = normalizeApiBase(apiBaseInput.value);
     settings.proxy  = proxyInput.value.trim() || DEFAULT_PROXY;
     settings.bibleId = bibleSelect.value || settings.bibleId;
     const opt = bibleSelect.options[bibleSelect.selectedIndex];
@@ -497,7 +520,7 @@
     if (!settings.apiKey) { bibleSelect.innerHTML = '<option value="">(enter API key first)</option>'; return; }
     bibleSelect.innerHTML = '<option value="">Loading…</option>';
     try {
-      const resp = await fetch(API_BASE + '/bibles?language=eng', { headers: { 'api-key': settings.apiKey } });
+      const resp = await fetch(getApiBase() + '/bibles?language=eng', { headers: { 'api-key': settings.apiKey } });
       if (!resp.ok) {
         // Try to surface the server's actual error message so we know what was wrong
         let serverMsg = '';
@@ -761,7 +784,7 @@
 
   // ---------- API.Bible: fetch passage HTML ----------
   async function fetchPassage(passageId) {
-    const url = `${API_BASE}/bibles/${encodeURIComponent(settings.bibleId)}/passages/${encodeURIComponent(passageId)}` +
+    const url = `${getApiBase()}/bibles/${encodeURIComponent(settings.bibleId)}/passages/${encodeURIComponent(passageId)}` +
                 `?content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false`;
     const resp = await fetch(url, { headers: { 'api-key': settings.apiKey } });
     if (!resp.ok) throw new Error(`Passage ${passageId} → HTTP ${resp.status}`);
