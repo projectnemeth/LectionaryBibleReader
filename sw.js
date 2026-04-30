@@ -6,7 +6,7 @@
    - api.php?action=feed: network-only (today's date matters; feed is fresh).
 */
 
-const VERSION = 'dailyword-v8';
+const VERSION = 'dailyword-v9';
 const SHELL = [
   './',
   './index.html',

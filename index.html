@@ -112,6 +112,10 @@
     -webkit-tap-highlight-color: transparent;
     transition: border-color .15s, color .15s;
   }
+  /* The [hidden] attribute is what JS sets when on the default view.
+     Need to override .back-to-today's display: inline-block with !important
+     so the attribute actually hides the element. */
+  .back-to-today[hidden] { display: none !important; }
   .back-to-today:hover, .back-to-today:focus-visible {
     border-color: var(--ink-soft); color: var(--ink); outline: 0;
   }
